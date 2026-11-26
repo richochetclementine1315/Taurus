@@ -1,0 +1,35 @@
+# We need infra like a DB, a cache and a message brocker. I dont wanna install them on machine. 0we describe it in one docker-compose.yml file and run it with docker-compose up -d. It will start all the services in the background.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: taurus-postgres
+    environment:
+      POSTGRES_USER: taurus
+      POSTGRES_PASSWORD: taurus
+      POSTGRES_DB: taurus
+    ports: 
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taurus"]
+      interval: 5s
+      timeout: 3s
+      retries: 10   
+  
+  redis:
+    image: redis:8-alpine
+    container_name: taurus-redis
+    ports:
+      - "6379:6379"
+
+  nats:
+    image: nats:2.11-alpine
+    container_name: taurus-nats
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+volumes:
+  pgdata:      
